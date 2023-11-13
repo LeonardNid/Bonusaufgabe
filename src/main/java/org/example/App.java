@@ -21,9 +21,9 @@ public class App {
         createTables();
         inserts();
 
-//        testMovie();
-
+        testMovie();
         testGenre();
+        testHasGenre();
 
 
 //        Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
@@ -83,6 +83,27 @@ public class App {
         m4.insertIntoGenre(conn);
     }
 
+    public static void testHasGenre() {
+        HasGenre m1 = new HasGenre(1,1); // testet insert
+        m1.insertIntoHasGenre(conn);
+//        m1.insertIntoHasGenre(conn); // exception
+
+        HasGenre m2 = new HasGenre(1,2); // testet update
+        m2.insertIntoHasGenre(conn);
+        m2.setGenreid(2);
+        m2.setMovieid(3);
+        m2.updateHasGenre(conn);
+
+        HasGenre m3 = new HasGenre(2,2); // testet delete
+        m3.insertIntoHasGenre(conn);
+        m3.deleteHasGenre(conn);
+
+        HasGenre m4 = new HasGenre(3,1); // testet delete/update ohne datensatz
+//        m4.deleteHasGenre(conn);
+//        m4.updateHasGenre(conn);
+        m4.insertIntoHasGenre(conn);
+    }
+
     public static void inserts() {
 //        insertIntogenre(1, "Horror");
 //        insertIntogenre(2, "Action");
@@ -90,8 +111,8 @@ public class App {
 //        insertIntomovie(1, "Spider-Man", 2020, "A");
 //        insertIntomovie(2, "Iron-Man", 2010, "B");
 
-        insertIntohasgenre(2,1);
-        insertIntohasgenre(2,2);
+//        insertIntohasgenre(2,1);
+//        insertIntohasgenre(2,2);
 
         insertIntoperson(1, "Peter", "M");
         insertIntoperson(2, "RBJ", "M");
@@ -118,7 +139,7 @@ public class App {
         }
     }
 
-    public static Movie[] findBytitle(String title) {
+    public static Movie[] findBytitle(String title) { // in eigene factoryclass und exception werfen nicht catchen
         String sql = "SELECT * FROM movie " +
                 "WHERE title LIKE ? ;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
