@@ -21,8 +21,9 @@ public class App {
         createTables();
         inserts();
 
-        testMovie();
+//        testMovie();
 
+        testGenre();
 
 
 //        Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
@@ -62,6 +63,42 @@ public class App {
         m4.insertIntomovie(conn);
     }
 
+    public static void testGenre() {
+        Genre m1 = new Genre("Horror"); // testet insert
+        m1.insertIntoGenre(conn);
+//        m1.insertIntoGenre(conn); // exception
+
+        Genre m2 = new Genre("Action"); // testet update
+        m2.insertIntoGenre(conn);
+        m2.setGenre("AKTION");
+        m2.updateGenre(conn);
+
+        Genre m3 = new Genre("Drama"); // testet delete
+        m3.insertIntoGenre(conn);
+        m3.deleteGenre(conn);
+
+        Genre m4 = new Genre("Comedy"); // testet delete/update ohne datensatz
+//        m4.deleteGenre(conn);
+//        m4.updateGenre(conn);
+        m4.insertIntoGenre(conn);
+    }
+
+    public static void inserts() {
+//        insertIntogenre(1, "Horror");
+//        insertIntogenre(2, "Action");
+
+//        insertIntomovie(1, "Spider-Man", 2020, "A");
+//        insertIntomovie(2, "Iron-Man", 2010, "B");
+
+        insertIntohasgenre(2,1);
+        insertIntohasgenre(2,2);
+
+        insertIntoperson(1, "Peter", "M");
+        insertIntoperson(2, "RBJ", "M");
+
+        insertIntomoviecharacter(1, "Peter Parker", "Spider-man", 1, 1,1);
+        insertIntomoviecharacter(2, "Tony Stark", "Iron-Man", 1, 1,1);
+    }
     public static Movie findById(long id) {
         String sql = "SELECT * FROM movie " +
                 "WHERE movieid = ? ;";
@@ -80,6 +117,7 @@ public class App {
             throw new RuntimeException(e);
         }
     }
+
     public static Movie[] findBytitle(String title) {
         String sql = "SELECT * FROM movie " +
                 "WHERE title LIKE ? ;";
@@ -102,23 +140,6 @@ public class App {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void inserts() {
-        insertIntogenre(1, "Horror");
-        insertIntogenre(2, "Action");
-
-//        insertIntomovie(1, "Spider-Man", 2020, "A");
-//        insertIntomovie(2, "Iron-Man", 2010, "B");
-
-        insertIntohasgenre(2,1);
-        insertIntohasgenre(2,2);
-
-        insertIntoperson(1, "Peter", "M");
-        insertIntoperson(2, "RBJ", "M");
-
-        insertIntomoviecharacter(1, "Peter Parker", "Spider-man", 1, 1,1);
-        insertIntomoviecharacter(2, "Tony Stark", "Iron-Man", 1, 1,1);
     }
 
     public static void insertIntogenre(long genreid, String genre) {
