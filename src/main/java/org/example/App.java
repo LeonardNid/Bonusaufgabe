@@ -19,11 +19,12 @@ public class App {
 
         dropTables();
         createTables();
-        inserts();
 
         testMovie();
         testGenre();
         testHasGenre();
+        testPerson();
+        testMovieCharacter();
 
 
 //        Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
@@ -39,6 +40,51 @@ public class App {
 //            movie.updatemovie(conn);
 //        }
 
+    }
+
+    public static void testMovieCharacter() {
+        MovieCharacter m1 = new MovieCharacter("Spider-Man", "Peter parker", 1, 1L,3L); // testet insert
+        m1.insertIntoMovieCharacter(conn);
+//        m1.insertIntoPerson(conn); // exception
+
+        MovieCharacter m2 = new MovieCharacter("Character", "Alias", 2 , 2L, 3L); // testet update
+        m2.insertIntoMovieCharacter(conn);
+        m2.setCharacter("Iron-Man");
+        m2.setAlias("Tony-Stark");
+        m2.setPosition(3);
+        m2.setMovieID(3L);
+        m2.setPersonID(3L);
+        m2.updateMovieCharacter(conn);
+
+        MovieCharacter m3 = new MovieCharacter("Char", "Alia", 3, 2L, 3L); // testet delete
+        m3.insertIntoMovieCharacter(conn);
+        m3.deleteMovieCharacter(conn);
+
+        MovieCharacter m4 = new MovieCharacter("Character", "Alias", 1, 1L, 1L); // testet delete/update ohne datensatz
+//        m4.deletePerson(conn);
+//        m4.updatePerson(conn);
+        m4.insertIntoMovieCharacter(conn);
+    }
+
+    public static void testPerson() {
+        Person m1 = new Person("Peter", "A"); // testet insert
+        m1.insertIntoPerson(conn);
+//        m1.insertIntoPerson(conn); // exception
+
+        Person m2 = new Person("Max", "M"); // testet update
+        m2.insertIntoPerson(conn);
+        m2.setName("RBJ");
+        m2.setSex("W");
+        m2.updatePerson(conn);
+
+        Person m3 = new Person("Lena", "W"); // testet delete
+        m3.insertIntoPerson(conn);
+        m3.deletePerson(conn);
+
+        Person m4 = new Person("Hanna", "Z"); // testet delete/update ohne datensatz
+//        m4.deletePerson(conn);
+//        m4.updatePerson(conn);
+        m4.insertIntoPerson(conn);
     }
 
     public static void testMovie() {
@@ -57,7 +103,7 @@ public class App {
         m3.insertIntomovie(conn);
         m3.deletemovie(conn);
 
-        Movie m4 = new Movie("Spider-Man4", 2020, "A"); // testet delete/update ohne datensatz
+        Movie m4 = new Movie("Iron-Man", 2020, "A"); // testet delete/update ohne datensatz
 //        m4.deletemovie(conn);
 //        m4.updatemovie(conn);
         m4.insertIntomovie(conn);
@@ -104,22 +150,6 @@ public class App {
         m4.insertIntoHasGenre(conn);
     }
 
-    public static void inserts() {
-//        insertIntogenre(1, "Horror");
-//        insertIntogenre(2, "Action");
-
-//        insertIntomovie(1, "Spider-Man", 2020, "A");
-//        insertIntomovie(2, "Iron-Man", 2010, "B");
-
-//        insertIntohasgenre(2,1);
-//        insertIntohasgenre(2,2);
-
-        insertIntoperson(1, "Peter", "M");
-        insertIntoperson(2, "RBJ", "M");
-
-        insertIntomoviecharacter(1, "Peter Parker", "Spider-man", 1, 1,1);
-        insertIntomoviecharacter(2, "Tony Stark", "Iron-Man", 1, 1,1);
-    }
     public static Movie findById(long id) {
         String sql = "SELECT * FROM movie " +
                 "WHERE movieid = ? ;";
