@@ -1,10 +1,12 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.example.Genre;
 import org.example.de.hsh.dbs2.imdb.util.DBConnection;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GenreManager {
 
@@ -16,9 +18,17 @@ public class GenreManager {
 	 */
 	public List<String> getGenres() throws Exception {
 		// TODO
+		List<String> list = new ArrayList<>();
+		String sql = "select genre from genre;";
 
-
-		return new ArrayList<>();
+		try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String genre = rs.getString("genre");
+				list.add(genre);
+			}
+		}
+		return list;
 	}
 
 }

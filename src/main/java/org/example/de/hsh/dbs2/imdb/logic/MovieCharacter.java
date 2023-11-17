@@ -1,4 +1,4 @@
-package org.example;
+package org.example.de.hsh.dbs2.imdb.logic;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +30,7 @@ public class MovieCharacter {
         this.movieID = movieID;
         this.personID = personID;
     }
-    public void insertIntoMovieCharacter(Connection conn) {
+    public void insertIntoMovieCharacter(Connection conn) throws SQLException {
         if (movCharID != null) {
             throw new RuntimeException();
         }
@@ -45,12 +45,10 @@ public class MovieCharacter {
             int cnt = statement.executeUpdate();
 
             setMovCharID(conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void updateMovieCharacter(Connection conn) {
+    public void updateMovieCharacter(Connection conn) throws SQLException {
         if (movCharID == null) {
             throw new RuntimeException();
         }
@@ -67,12 +65,10 @@ public class MovieCharacter {
             statement.setLong(6, movCharID);
 
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void deleteMovieCharacter(Connection conn) {
+    public void deleteMovieCharacter(Connection conn) throws SQLException {
         if (movCharID == null) {
             throw new RuntimeException();
         }
@@ -83,18 +79,14 @@ public class MovieCharacter {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, movCharID);
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void setMovCharID(Connection conn) {
+    private void setMovCharID(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             this.movCharID = rs.getLong(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -222,6 +222,7 @@ public class CharacterDialog extends JDialog {
 		List<String> p;
 		if (txtPlayer.getText().isEmpty()) {
 			p = new ArrayList<String>();
+//			p = callback.getPersonList(txtPlayer.getText());
 		} else {
 			p = callback.getPersonList(txtPlayer.getText());
 		}

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.de.hsh.dbs2.imdb.logic;
 
 import org.example.de.hsh.dbs2.imdb.util.DBConnection;
 
@@ -16,8 +16,6 @@ public class Movie {
         this.title = title;
         this.year = year;
         this.type =type;
-
-        System.out.println("MOVIE:");
     }
     public Movie(Long movieid, String title, Integer year, String type) {
         this.movieid = movieid;
@@ -26,11 +24,7 @@ public class Movie {
         this.type =type;
     }
 
-    public void insertIntomovie(Connection conn) {
-
-        System.out.println("MOVIe insert");
-        System.out.println(DBConnection.getConnection());
-
+    public void insertIntomovie(Connection conn) throws SQLException {
         if (movieid != null) {
             throw new RuntimeException();
         }
@@ -43,12 +37,10 @@ public class Movie {
             int cnt = statement.executeUpdate();
 
             setMovieid(conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void updatemovie(Connection conn) {
+    public void updatemovie(Connection conn) throws SQLException {
         if (movieid == null) {
             throw new RuntimeException();
         }
@@ -63,12 +55,10 @@ public class Movie {
             statement.setLong(4, movieid);
 
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void deletemovie(Connection conn) {
+    public void deletemovie(Connection conn) throws SQLException {
         if (movieid == null) {
             throw new RuntimeException();
         }
@@ -79,18 +69,14 @@ public class Movie {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, movieid);
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void setMovieid(Connection conn) {
+    private void setMovieid(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             this.movieid = rs.getLong(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 

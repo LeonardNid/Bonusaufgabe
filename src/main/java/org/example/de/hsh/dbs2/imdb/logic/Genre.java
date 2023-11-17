@@ -1,4 +1,4 @@
-package org.example;
+package org.example.de.hsh.dbs2.imdb.logic;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,7 +16,7 @@ public class Genre {
         this.genre = genre;
     }
 
-    public void insertIntoGenre(Connection conn) {
+    public void insertIntoGenre(Connection conn) throws SQLException {
         if (genreid != null) {
             throw new RuntimeException();
         }
@@ -30,7 +30,7 @@ public class Genre {
         }
     }
 
-    public void updateGenre(Connection conn) {
+    public void updateGenre(Connection conn) throws SQLException {
         if (genreid == null) {
             throw new RuntimeException();
         }
@@ -43,12 +43,10 @@ public class Genre {
             statement.setLong(2, genreid);
 
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void deleteGenre(Connection conn) {
+    public void deleteGenre(Connection conn) throws SQLException {
         if (genreid == null) {
             throw new RuntimeException();
         }
@@ -59,18 +57,14 @@ public class Genre {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, genreid);
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void setGenreid(Connection conn) {
+    private void setGenreid(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             this.genreid = rs.getLong(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 

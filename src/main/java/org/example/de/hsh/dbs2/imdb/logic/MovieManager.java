@@ -1,12 +1,10 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.example.Movie;
 import org.example.de.hsh.dbs2.imdb.logic.dto.*;
 import org.example.de.hsh.dbs2.imdb.util.DBConnection;
 
@@ -22,8 +20,26 @@ public class MovieManager {
 	 */
 	public List<MovieDTO> getMovieList(String search) throws Exception {
 		// TODO
+		List<MovieDTO> list = new ArrayList<>();
+		String sql = "select * from movie where title like ?;";
 
-		return new ArrayList<>();
+		try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+			statement.setString(1, "%" + search + "%");
+
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+
+				MovieDTO md = new MovieDTO();
+				md.setId(rs.getLong("movieid"));
+				md.setTitle(rs.getString("title"));
+				md.setYear(rs.getInt("year"));
+				md.setType(rs.getString("type"));
+				list.add(md);
+
+
+			}
+		}
+		return list;
 	}
 
 	/**
@@ -39,6 +55,14 @@ public class MovieManager {
 		// TODO
 		Movie m1 = new Movie(movieDTO.getTitle(), movieDTO.getYear(), movieDTO.getType());
 		m1.insertIntomovie(DBConnection.getConnection());
+
+		Genre g1 = GenreFactory.findbyGenre((String) movieDTO.getGenres().toArray()[0]);
+
+		HasGenre hg1 = new HasGenre(g1.getGenreid() ,m1.getMovieid());
+		hg1.insertIntoHasGenre(DBConnection.getConnection());
+
+		System.out.println(movieDTO.getGenres().toString());
+		System.out.println(movieDTO.getCharacters());
 	}
 
 	/**
@@ -59,7 +83,13 @@ public class MovieManager {
 	 */
 	public MovieDTO getMovie(long movieId) throws Exception {
 		// TODO
-		return null;
+		MovieDTO md = new MovieDTO();
+		Movie m1 = MovieFactory.findById(movieId);
+		md.setId(m1.getMovieid());
+		md.setTitle(m1.getTitle());
+		md.setYear(m1.getYear());
+		md.setType(m1.getType());
+		return md;
 	}
 
 }

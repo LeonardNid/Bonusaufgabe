@@ -1,7 +1,13 @@
 package org.example;
 
+import org.example.de.hsh.dbs2.imdb.logic.Genre;
+import org.example.de.hsh.dbs2.imdb.logic.Movie;
+import org.example.de.hsh.dbs2.imdb.logic.MovieCharacter;
+import org.example.de.hsh.dbs2.imdb.logic.Person;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Queue;
 
 /**
  * Hello world!
@@ -11,20 +17,26 @@ public class App {
     private static Connection conn;
 
     public static void main( String[] args ) {
-//        try {
-//            conn = DriverManager.getConnection("jdbc:sqlite:sqlite-test.db");
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            conn = DriverManager.getConnection("jdbc:sqlite:sqlite-test.db");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         dropTables();
         createTables();
 
-//        testMovie();
-//        testGenre();
+
+
+        try {
+//            testMovie();
+            testGenre();
+            testPerson();
+//            testMovieCharacter();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 //        testHasGenre();
-//        testPerson();
-//        testMovieCharacter();
 
 
 //        Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
@@ -42,7 +54,7 @@ public class App {
 
     }
 
-    public static void testMovieCharacter() {
+    public static void testMovieCharacter() throws SQLException {
         MovieCharacter m1 = new MovieCharacter("Spider-Man", "Peter parker", 1, 1L,3L); // testet insert
         m1.insertIntoMovieCharacter(conn);
 //        m1.insertIntoPerson(conn); // exception
@@ -65,8 +77,8 @@ public class App {
 //        m4.updatePerson(conn);
         m4.insertIntoMovieCharacter(conn);
     }
-
-    public static void testPerson() {
+//
+    public static void testPerson() throws SQLException {
         Person m1 = new Person("Peter", "A"); // testet insert
         m1.insertIntoPerson(conn);
 //        m1.insertIntoPerson(conn); // exception
@@ -86,8 +98,8 @@ public class App {
 //        m4.updatePerson(conn);
         m4.insertIntoPerson(conn);
     }
-
-    public static void testMovie() {
+//
+    public static void testMovie() throws SQLException {
         Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
         m1.insertIntomovie(conn);
 //        m1.insertIntomovie(conn); // exception
@@ -108,8 +120,8 @@ public class App {
 //        m4.updatemovie(conn);
         m4.insertIntomovie(conn);
     }
-
-    public static void testGenre() {
+//
+    public static void testGenre() throws SQLException {
         Genre m1 = new Genre("Horror"); // testet insert
         m1.insertIntoGenre(conn);
 //        m1.insertIntoGenre(conn); // exception
@@ -128,64 +140,64 @@ public class App {
 //        m4.updateGenre(conn);
         m4.insertIntoGenre(conn);
     }
+//
+//    public static void testHasGenre() {
+//        HasGenre m1 = new HasGenre(1,1); // testet insert
+//        m1.insertIntoHasGenre(conn);
+////        m1.insertIntoHasGenre(conn); // exception
+//
+//        HasGenre m3 = new HasGenre(2,2); // testet delete
+//        m3.insertIntoHasGenre(conn);
+//        m3.deleteHasGenre(conn);
+//
+//        HasGenre m4 = new HasGenre(3,1); // testet delete/update ohne datensatz
+////        m4.deleteHasGenre(conn);
+////        m4.updateHasGenre(conn);
+//        m4.insertIntoHasGenre(conn);
+//    }
 
-    public static void testHasGenre() {
-        HasGenre m1 = new HasGenre(1,1); // testet insert
-        m1.insertIntoHasGenre(conn);
-//        m1.insertIntoHasGenre(conn); // exception
+//    public static Movie findById(long id) {
+//        String sql = "SELECT * FROM movie " +
+//                "WHERE movieid = ? ;";
+//        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+//            statement.setLong(1, id);
+//
+//            ResultSet rs = statement.executeQuery();
+//
+//            String title = rs.getString("title");
+//            int year = rs.getInt("year");
+//            String type = rs.getString("type");
+//
+//            return new Movie(id,title,year,type);
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-        HasGenre m3 = new HasGenre(2,2); // testet delete
-        m3.insertIntoHasGenre(conn);
-        m3.deleteHasGenre(conn);
-
-        HasGenre m4 = new HasGenre(3,1); // testet delete/update ohne datensatz
-//        m4.deleteHasGenre(conn);
-//        m4.updateHasGenre(conn);
-        m4.insertIntoHasGenre(conn);
-    }
-
-    public static Movie findById(long id) {
-        String sql = "SELECT * FROM movie " +
-                "WHERE movieid = ? ;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, id);
-
-            ResultSet rs = statement.executeQuery();
-
-            String title = rs.getString("title");
-            int year = rs.getInt("year");
-            String type = rs.getString("type");
-
-            return new Movie(id,title,year,type);
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Movie[] findBytitle(String title) { // in eigene factoryclass und exception werfen nicht catchen
-        String sql = "SELECT * FROM movie " +
-                "WHERE title LIKE ? ;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1,"%" + title + "%");
-
-            ResultSet rs = statement.executeQuery();
-
-            ArrayList<Movie> list = new ArrayList<>();
-
-            while (rs.next()) {
-                long id = rs.getLong("movieid");
-                int year = rs.getInt("year");
-                String type = rs.getString("type");
-
-                list.add(new Movie(id, title, year, type));
-            }
-
-            return list.toArray(new Movie[0]);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static Movie[] findBytitle(String title) { // in eigene factoryclass und exception werfen nicht catchen
+//        String sql = "SELECT * FROM movie " +
+//                "WHERE title LIKE ? ;";
+//        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+//            statement.setString(1,"%" + title + "%");
+//
+//            ResultSet rs = statement.executeQuery();
+//
+//            ArrayList<Movie> list = new ArrayList<>();
+//
+//            while (rs.next()) {
+//                long id = rs.getLong("movieid");
+//                int year = rs.getInt("year");
+//                String type = rs.getString("type");
+//
+//                list.add(new Movie(id, title, year, type));
+//            }
+//
+//            return list.toArray(new Movie[0]);
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public static void dropTables() {
         dropTable("genre");

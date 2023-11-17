@@ -1,4 +1,4 @@
-package org.example;
+package org.example.de.hsh.dbs2.imdb.logic;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,7 +19,7 @@ public class Person {
         this.sex =sex;
     }
 
-    public void insertIntoPerson(Connection conn) {
+    public void insertIntoPerson(Connection conn) throws SQLException {
         if (personID != null) {
             throw new RuntimeException();
         }
@@ -31,12 +31,10 @@ public class Person {
             int cnt = statement.executeUpdate();
 
             setPersonID(conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void updatePerson(Connection conn) {
+    public void updatePerson(Connection conn) throws SQLException {
         if (personID == null) {
             throw new RuntimeException();
         }
@@ -50,12 +48,10 @@ public class Person {
             statement.setLong(3, personID);
 
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public void deletePerson(Connection conn) {
+    public void deletePerson(Connection conn) throws SQLException {
         if (personID == null) {
             throw new RuntimeException();
         }
@@ -66,18 +62,14 @@ public class Person {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, personID);
             int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void setPersonID(Connection conn) {
+    private void setPersonID(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             this.personID = rs.getLong(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
