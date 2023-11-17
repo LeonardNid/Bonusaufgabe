@@ -11,20 +11,20 @@ public class App {
     private static Connection conn;
 
     public static void main( String[] args ) {
-        try {
-            conn = DriverManager.getConnection("jdbc:sqlite:sqlite-test.db");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            conn = DriverManager.getConnection("jdbc:sqlite:sqlite-test.db");
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
 
         dropTables();
         createTables();
 
-        testMovie();
-        testGenre();
-        testHasGenre();
-        testPerson();
-        testMovieCharacter();
+//        testMovie();
+//        testGenre();
+//        testHasGenre();
+//        testPerson();
+//        testMovieCharacter();
 
 
 //        Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
@@ -134,12 +134,6 @@ public class App {
         m1.insertIntoHasGenre(conn);
 //        m1.insertIntoHasGenre(conn); // exception
 
-        HasGenre m2 = new HasGenre(1,2); // testet update
-        m2.insertIntoHasGenre(conn);
-        m2.setGenreid(2);
-        m2.setMovieid(3);
-        m2.updateHasGenre(conn);
-
         HasGenre m3 = new HasGenre(2,2); // testet delete
         m3.insertIntoHasGenre(conn);
         m3.deleteHasGenre(conn);
@@ -188,64 +182,6 @@ public class App {
             }
 
             return list.toArray(new Movie[0]);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void insertIntogenre(long genreid, String genre) {
-        String sql = "INSERT INTO genre VALUES (?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, genreid);
-            statement.setString(2, genre);
-            int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public static void insertIntomovie(long movieid, String title, int year, String type ) {
-        String sql = "INSERT INTO movie VALUES (?, ?, ?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, movieid);
-            statement.setString(2, title);
-            statement.setInt(3, year);
-            statement.setString(4, type);
-            int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public static void insertIntohasgenre(long genreid, long movieid) {
-        String sql = "INSERT INTO hasgenre VALUES (?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, genreid);
-            statement.setLong(1, movieid);
-            int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public static void insertIntoperson(long personid, String name, String sex) {
-        String sql = "INSERT INTO person VALUES (?, ?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, personid);
-            statement.setString(2, name);
-            statement.setString(3, sex);
-            int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public static void insertIntomoviecharacter(long movcharid, String character, String alias, int position, int movieid, int personid) {
-        String sql = "INSERT INTO moviecharacter VALUES (?, ?, ?, ?, ?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, movcharid);
-            statement.setString(2, character);
-            statement.setString(3, alias);
-            statement.setInt(4, position);
-            statement.setInt(5, movieid);
-            statement.setInt(6, personid);
-            int cnt = statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

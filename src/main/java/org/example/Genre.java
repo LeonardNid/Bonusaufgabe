@@ -27,8 +27,6 @@ public class Genre {
             int cnt = statement.executeUpdate();
 
             setGenreid(conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 

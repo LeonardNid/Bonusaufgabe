@@ -7,9 +7,7 @@ import java.sql.SQLException;
 
 public class HasGenre {
     private Long genreid = null;
-    private Long tempGenreid = null;
     private Long movieid = null;
-    private Long tempMovieid = null;
 
     public HasGenre(long genreid, long movieid) {
         this.genreid = genreid;
@@ -25,29 +23,6 @@ public class HasGenre {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, genreid);
             statement.setLong(2, movieid);
-            int cnt = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void updateHasGenre(Connection conn) {
-        if (genreid == null && movieid == null) {
-            throw new RuntimeException();
-        }
-
-        String sql = "UPDATE HasGenre "+
-                " SET genreid = ?, movieid = ?"+
-                " WHERE genreid = ? AND movieid = ?;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, tempGenreid);
-            statement.setLong(2, tempMovieid);
-            statement.setLong(3, genreid);
-            statement.setLong(4, movieid);
-
-            genreid = tempGenreid;
-            movieid = tempMovieid;
-
             int cnt = statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -71,15 +46,8 @@ public class HasGenre {
         }
     }
 
-    public void setGenreid(long genreid) {
-        this.tempGenreid = genreid;
-    }
-
     public long getGenreid() {
         return genreid;
-    }
-    public void setMovieid(long movieid) {
-        this.tempMovieid = movieid;
     }
 
     public Long getMovieid() {

@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.de.hsh.dbs2.imdb.util.DBConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +16,8 @@ public class Movie {
         this.title = title;
         this.year = year;
         this.type =type;
+
+        System.out.println("MOVIE:");
     }
     public Movie(Long movieid, String title, Integer year, String type) {
         this.movieid = movieid;
@@ -23,6 +27,10 @@ public class Movie {
     }
 
     public void insertIntomovie(Connection conn) {
+
+        System.out.println("MOVIe insert");
+        System.out.println(DBConnection.getConnection());
+
         if (movieid != null) {
             throw new RuntimeException();
         }
