@@ -99,7 +99,7 @@ public class App {
         m4.insertIntoPerson(conn);
     }
 //
-    public static void testMovie() throws SQLException {
+    public static void testMovie() throws Exception {
         Movie m1 = new Movie("Spider-Man", 2020, "A"); // testet insert
         m1.insertIntomovie(conn);
 //        m1.insertIntomovie(conn); // exception

@@ -19,15 +19,11 @@ public class GenreManager {
 	public List<String> getGenres() throws Exception {
 		// TODO
 		List<String> list = new ArrayList<>();
-		String sql = "select genre from genre;";
 
-		try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
-				String genre = rs.getString("genre");
-				list.add(genre);
-			}
+		for (Genre genre : GenreFactory.findByGenre("")) {
+			list.add(genre.getGenre());
 		}
+
 		return list;
 	}
 

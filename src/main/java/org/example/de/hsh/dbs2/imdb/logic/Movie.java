@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 
 public class Movie {
     private Long movieid = null;
@@ -24,7 +25,7 @@ public class Movie {
         this.type =type;
     }
 
-    public void insertIntomovie(Connection conn) throws SQLException {
+    public void insertIntomovie(Connection conn) throws Exception {
         if (movieid != null) {
             throw new RuntimeException();
         }
@@ -35,6 +36,7 @@ public class Movie {
             statement.setInt(2, year);
             statement.setString(3, type);
             int cnt = statement.executeUpdate();
+
 
             setMovieid(conn);
         }
@@ -58,7 +60,7 @@ public class Movie {
         }
     }
 
-    public void deletemovie(Connection conn) throws SQLException {
+    public void deletemovie(Connection conn) throws Exception {
         if (movieid == null) {
             throw new RuntimeException();
         }
@@ -80,7 +82,7 @@ public class Movie {
         }
     }
 
-    public long getMovieid() {
+    public Long getMovieid() {
         return movieid;
     }
 

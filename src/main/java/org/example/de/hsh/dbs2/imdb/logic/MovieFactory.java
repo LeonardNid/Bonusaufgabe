@@ -25,11 +25,11 @@ public class MovieFactory {
         }
     }
 
-    public static Movie[] findBytitle(String title) throws SQLException { // in eigene factoryclass und exception werfen nicht catchen
+    public static ArrayList<Movie> findBytitle(String search) throws SQLException { // in eigene factoryclass und exception werfen nicht catchen
         String sql = "SELECT * FROM movie " +
                 "WHERE title LIKE ? ;";
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
-            statement.setString(1,"%" + title + "%");
+            statement.setString(1,"%" + search + "%");
 
             ResultSet rs = statement.executeQuery();
 
@@ -37,13 +37,13 @@ public class MovieFactory {
 
             while (rs.next()) {
                 long id = rs.getLong("movieid");
+                String title = rs.getString("title");
                 int year = rs.getInt("year");
                 String type = rs.getString("type");
 
                 list.add(new Movie(id, title, year, type));
             }
-
-            return list.toArray(new Movie[0]);
+            return list;
         }
     }
 }
