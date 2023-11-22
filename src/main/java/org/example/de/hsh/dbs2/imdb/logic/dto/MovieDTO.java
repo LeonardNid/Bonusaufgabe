@@ -52,7 +52,6 @@ public class MovieDTO {
 	}
 	public void addCharacter(CharacterDTO cdto) {
 		characters.add(cdto);
-		
 	}
 	public Set<String> getGenres() {
 		return genres;

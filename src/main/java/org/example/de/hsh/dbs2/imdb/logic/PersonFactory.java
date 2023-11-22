@@ -29,4 +29,48 @@ public class PersonFactory {
             return list;
         }
     }
+
+    public static Person findOnename(String search) throws SQLException { // in eigene factoryclass und exception werfen nicht catchen
+        String sql = "SELECT * FROM person " +
+                "WHERE name = ? ;";
+        try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+            statement.setString(1,search);
+
+            ResultSet rs = statement.executeQuery();
+
+            Person person = null;
+
+            while (rs.next()) {
+                long id = rs.getLong("personid");
+                String name = rs.getString("name");
+                String sex = rs.getString("sex");
+
+                person = new Person(id, name, sex);
+            }
+
+            return person;
+        }
+    }
+
+    public static Person findbyid(Long personid) throws SQLException { // in eigene factoryclass und exception werfen nicht catchen
+        String sql = "SELECT * FROM person " +
+                "WHERE personid = ? ;";
+        try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+            statement.setLong(1, personid);
+
+            ResultSet rs = statement.executeQuery();
+
+            Person person = null;
+
+            while (rs.next()) {
+                long id = rs.getLong("personid");
+                String name = rs.getString("name");
+                String sex = rs.getString("sex");
+
+                person = new Person(id, name, sex);
+            }
+
+            return person;
+        }
+    }
 }

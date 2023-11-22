@@ -23,6 +23,7 @@ public class CharacterDTO {
 	}
 	
 	public void setCharacter(String character) {
+
 		this.character = character;
 	}
 	

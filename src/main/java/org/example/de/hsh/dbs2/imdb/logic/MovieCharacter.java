@@ -30,10 +30,28 @@ public class MovieCharacter {
         this.movieID = movieID;
         this.personID = personID;
     }
+
+    public MovieCharacter(String character, String alias, Long movieID, Long personID) {
+        this.character = character;
+        this.alias = alias;
+        this.movieID = movieID;
+        this.personID = personID;
+    }
+
+    private void findMaxPos(Connection conn) throws SQLException {
+        String sql = "Select position from moviecharacter order by position desc;";
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            ResultSet rs = statement.executeQuery(); //TODO ALLE Resultset muss in try
+            setPosition(rs.getInt("position") + 1);
+        }
+    }
+
     public void insertIntoMovieCharacter(Connection conn) throws SQLException {
         if (movCharID != null) {
             throw new RuntimeException();
         }
+
+        findMaxPos(conn);
 
         String sql = "INSERT INTO moviecharacter (character, alias, position, movieid, personid) VALUES (?, ?, ?, ?, ?);";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {

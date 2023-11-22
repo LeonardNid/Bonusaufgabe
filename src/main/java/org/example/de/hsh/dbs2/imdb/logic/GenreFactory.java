@@ -26,4 +26,41 @@ public class GenreFactory {
             return list;
         }
     }
+
+    public static Genre findOneGenre(String search) throws SQLException {
+        String sql = "SELECT * FROM genre " +
+                "WHERE genre = ? ;";
+        Genre genre = null;
+        try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+            statement.setString(1, search);
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                Long id = rs.getLong("genreid");
+                String genreString = rs.getString("genre");
+
+                genre = new Genre(id, genreString);
+            }
+            return genre;
+        }
+    }
+
+    public static Genre findbyid(Long id) throws SQLException {
+        String sql = "SELECT * FROM genre " +
+                "WHERE genreid = ? ;";
+        Genre genre = null;
+        try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
+            statement.setLong(1, id);
+
+            ResultSet rs = statement.executeQuery();
+
+            Long id2 = rs.getLong("genreid");
+            String genreString = rs.getString("genre");
+
+            genre = new Genre(id2, genreString);
+
+            return genre;
+        }
+    }
 }

@@ -50,11 +50,62 @@ public class MovieManager {
 		if (m1.getMovieid() == null) {
 			m1.insertIntomovie(DBConnection.getConnection());
 			movieDTO.setId(m1.getMovieid());
+
+			insertHasGenre(movieDTO, m1);
+
+			insertMovieCharcter(movieDTO, m1);
+
+
 		} else {
-//			m1.deletemovie(DBConnection.getConnection());
 			m1.updatemovie(DBConnection.getConnection());
+			/*
+			Löscht alle Einträge aus HasGenre mit der Movie id von moviedto
+			*/
+			for (Genre genre : GenreFactory.findByGenre("")) {
+				HasGenre hasGenre = new HasGenre(genre.getGenreid() , m1.getMovieid());
+				hasGenre.deleteHasGenre(DBConnection.getConnection());
+			}
+			insertHasGenre(movieDTO, m1);
+
+			for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(m1.getMovieid())) {
+				MovieCharacter movieCharacter1 = new MovieCharacter(
+						movieCharacter.getMovCharID(),
+						movieCharacter.getCharacter(),
+						movieCharacter.getAlias(),
+						movieCharacter.getPosition(),
+						movieCharacter.getMovieID(),
+						movieCharacter.getPersonID()
+				);
+				movieCharacter1.deleteMovieCharacter(DBConnection.getConnection());
+			}
+			insertMovieCharcter(movieDTO, m1);
+
 		}
 
+	}
+	/*
+	loop jeden Genre aus moviedto
+	Genre wird mit findOneGenre gefunden um auf die id zugreifen zu können
+	Hasgenre wird erstellt und insertet
+	 */
+	private void insertHasGenre(MovieDTO movieDTO, Movie m1) throws Exception {
+		for (String genre : movieDTO.getGenres()) {
+			Genre genre1 = GenreFactory.findOneGenre(genre);
+			HasGenre hasGenre = new HasGenre(genre1.getGenreid() , m1.getMovieid());
+			hasGenre.insertIntoHasGenre(DBConnection.getConnection());
+		}
+	}
+
+	private void insertMovieCharcter(MovieDTO movieDTO, Movie m1) throws SQLException {
+		for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
+			MovieCharacter movieCharacter = new MovieCharacter(
+					characterDTO.getCharacter(),
+					characterDTO.getAlias(),
+					m1.getMovieid(),
+					PersonFactory.findOnename(characterDTO.getPlayer()).getPersonID()
+			);
+			movieCharacter.insertIntoMovieCharacter(DBConnection.getConnection());
+		}
 	}
 
 	/**
@@ -75,6 +126,7 @@ public class MovieManager {
 	 * @return
 	 * @throws Exception
 	 */
+
 	public MovieDTO getMovie(long movieId) throws Exception {
 		// TODO
 		MovieDTO md = new MovieDTO();
@@ -83,6 +135,23 @@ public class MovieManager {
 		md.setTitle(m1.getTitle());
 		md.setYear(m1.getYear());
 		md.setType(m1.getType());
+
+
+		for (Long id : HasGenreFactory.findById(movieId)) {
+			Genre genre = GenreFactory.findbyid(id);
+			md.addGenre(genre.getGenre());
+		}
+
+		for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(movieId)) {
+			CharacterDTO characterDTO = new CharacterDTO();
+			characterDTO.setAlias(movieCharacter.getAlias());
+			characterDTO.setCharacter(movieCharacter.getCharacter());
+			characterDTO.setPlayer(PersonFactory.findbyid(movieCharacter.getPersonID()).getName());
+			md.addCharacter(characterDTO);
+		}
+
+
+
 		return md;
 	}
 
