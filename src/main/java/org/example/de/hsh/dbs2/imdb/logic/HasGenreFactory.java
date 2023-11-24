@@ -15,17 +15,14 @@ public class HasGenreFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setLong(1, id);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Long genreid = rs.getLong("genreid");
 
-            while (rs.next()) {
-                Long genreid = rs.getLong("genreid");
-
-                list.add(genreid);
+                    list.add(genreid);
+                }
             }
-
-
             return list;
-
         }
     }
 }

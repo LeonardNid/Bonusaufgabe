@@ -68,8 +68,9 @@ public class Person {
     private void setPersonID(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            ResultSet rs = statement.executeQuery();
-            this.personID = rs.getLong(1);
+            try (ResultSet rs = statement.executeQuery()) {
+                this.personID = rs.getLong(1);
+            }
         }
     }
 

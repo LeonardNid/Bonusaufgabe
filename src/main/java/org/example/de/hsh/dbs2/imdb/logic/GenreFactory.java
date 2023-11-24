@@ -15,14 +15,15 @@ public class GenreFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1, "%" + search + "%");
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Long id = rs.getLong("genreid");
+                    String genre = rs.getString("genre");
 
-            while (rs.next()) {
-                Long id = rs.getLong("genreid");
-                String genre = rs.getString("genre");
-
-                list.add(new Genre(id, genre));
+                    list.add(new Genre(id, genre));
+                }
             }
+
             return list;
         }
     }
@@ -34,33 +35,30 @@ public class GenreFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1, search);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Long id = rs.getLong("genreid");
+                    String genreString = rs.getString("genre");
 
-            while (rs.next()) {
-                Long id = rs.getLong("genreid");
-                String genreString = rs.getString("genre");
-
-                genre = new Genre(id, genreString);
+                    genre = new Genre(id, genreString);
+                }
+                return genre;
             }
-            return genre;
         }
     }
 
     public static Genre findbyid(Long id) throws SQLException {
         String sql = "SELECT * FROM genre " +
                 "WHERE genreid = ? ;";
-        Genre genre = null;
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setLong(1, id);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
+                Long id2 = rs.getLong("genreid");
+                String genreString = rs.getString("genre");
 
-            Long id2 = rs.getLong("genreid");
-            String genreString = rs.getString("genre");
-
-            genre = new Genre(id2, genreString);
-
-            return genre;
+                return new Genre(id2, genreString);
+            }
         }
     }
 }

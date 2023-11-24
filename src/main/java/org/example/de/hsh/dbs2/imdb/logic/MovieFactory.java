@@ -14,13 +14,13 @@ public class MovieFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setLong(1, id);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
+                String title = rs.getString("title");
+                int year = rs.getInt("year");
+                String type = rs.getString("type");
 
-            String title = rs.getString("title");
-            int year = rs.getInt("year");
-            String type = rs.getString("type");
-
-            return new Movie(id,title,year,type);
+                return new Movie(id,title,year,type);
+            }
 
         }
     }
@@ -31,17 +31,17 @@ public class MovieFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1,"%" + search + "%");
 
-            ResultSet rs = statement.executeQuery();
-
             ArrayList<Movie> list = new ArrayList<>();
 
-            while (rs.next()) {
-                long id = rs.getLong("movieid");
-                String title = rs.getString("title");
-                int year = rs.getInt("year");
-                String type = rs.getString("type");
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    long id = rs.getLong("movieid");
+                    String title = rs.getString("title");
+                    int year = rs.getInt("year");
+                    String type = rs.getString("type");
 
-                list.add(new Movie(id, title, year, type));
+                    list.add(new Movie(id, title, year, type));
+                }
             }
             return list;
         }

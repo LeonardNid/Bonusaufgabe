@@ -77,8 +77,9 @@ public class Movie {
     private void setMovieid(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            ResultSet rs = statement.executeQuery();
-            this.movieid = rs.getLong(1);
+            try (ResultSet rs = statement.executeQuery()) {
+                this.movieid = rs.getLong(1);
+            }
         }
     }
 

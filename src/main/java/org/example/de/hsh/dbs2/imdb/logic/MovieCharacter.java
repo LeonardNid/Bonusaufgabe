@@ -41,8 +41,10 @@ public class MovieCharacter {
     private void findMaxPos(Connection conn) throws SQLException {
         String sql = "Select position from moviecharacter order by position desc;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            ResultSet rs = statement.executeQuery(); //TODO ALLE Resultset muss in try
-            setPosition(rs.getInt("position") + 1);
+            try (ResultSet rs = statement.executeQuery()) {
+                setPosition(rs.getInt("position") + 1);
+
+            }
         }
     }
 
@@ -103,8 +105,9 @@ public class MovieCharacter {
     private void setMovCharID(Connection conn) throws SQLException {
         String sql = "SELECT last_insert_rowid() AS id;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            ResultSet rs = statement.executeQuery();
-            this.movCharID = rs.getLong(1);
+            try (ResultSet rs = statement.executeQuery()) {
+                this.movCharID = rs.getLong(1);
+            }
         }
     }
 

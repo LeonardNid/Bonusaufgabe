@@ -14,18 +14,17 @@ public class PersonFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1,"%" + search + "%");
 
-            ResultSet rs = statement.executeQuery();
-
             ArrayList<Person> list = new ArrayList<>();
 
-            while (rs.next()) {
-                long id = rs.getLong("personid");
-                String name = rs.getString("name");
-                String sex = rs.getString("sex");
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    long id = rs.getLong("personid");
+                    String name = rs.getString("name");
+                    String sex = rs.getString("sex");
 
-                list.add(new Person(id, name, sex));
+                    list.add(new Person(id, name, sex));
+                }
             }
-
             return list;
         }
     }
@@ -36,18 +35,17 @@ public class PersonFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1,search);
 
-            ResultSet rs = statement.executeQuery();
-
             Person person = null;
 
-            while (rs.next()) {
-                long id = rs.getLong("personid");
-                String name = rs.getString("name");
-                String sex = rs.getString("sex");
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    long id = rs.getLong("personid");
+                    String name = rs.getString("name");
+                    String sex = rs.getString("sex");
 
-                person = new Person(id, name, sex);
+                    person = new Person(id, name, sex);
+                }
             }
-
             return person;
         }
     }
@@ -58,19 +56,13 @@ public class PersonFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setLong(1, personid);
 
-            ResultSet rs = statement.executeQuery();
-
-            Person person = null;
-
-            while (rs.next()) {
+            try (ResultSet rs = statement.executeQuery()) {
                 long id = rs.getLong("personid");
                 String name = rs.getString("name");
                 String sex = rs.getString("sex");
 
-                person = new Person(id, name, sex);
+                return new Person(id, name, sex);
             }
-
-            return person;
         }
     }
 }
