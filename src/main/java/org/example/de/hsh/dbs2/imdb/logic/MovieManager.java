@@ -3,11 +3,9 @@ package org.example.de.hsh.dbs2.imdb.logic;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.example.de.hsh.dbs2.imdb.logic.dto.*;
 import org.example.de.hsh.dbs2.imdb.util.DBConnection;
-import org.sqlite.core.DB;
 
 public class MovieManager {
 
@@ -23,13 +21,8 @@ public class MovieManager {
 		// TODO
 		List<MovieDTO> list = new ArrayList<>();
 		ArrayList<Movie> movies = MovieFactory.findBytitle(search);
-		for (int i = 0; i < movies.size(); ++i) {
-			MovieDTO md = new MovieDTO();
-			md.setId(movies.get(i).getMovieid());
-			md.setTitle(movies.get(i).getTitle());
-			md.setYear(movies.get(i).getYear());
-			md.setType(movies.get(i).getType());
-			list.add(md);
+		for (Movie movie : movies) {
+			list.add(getMovie(movie.getMovieid()));
 		}
 		return list;
 	}
@@ -45,43 +38,48 @@ public class MovieManager {
 	 */
 	public void insertUpdateMovie(MovieDTO movieDTO) throws Exception {
 		// TODO
+		boolean ok = false;
 		Movie m1 = new Movie(movieDTO.getId(), movieDTO.getTitle(), movieDTO.getYear(), movieDTO.getType());
+		try {
+			if (m1.getMovieid() == null) {
+				m1.insertIntomovie(DBConnection.getConnection());
+				movieDTO.setId(m1.getMovieid());
 
-		if (m1.getMovieid() == null) {
-			m1.insertIntomovie(DBConnection.getConnection());
-			movieDTO.setId(m1.getMovieid());
+				insertHasGenre(movieDTO, m1);
+				insertMovieCharcter(movieDTO, m1);
 
-			insertHasGenre(movieDTO, m1);
+			} else {
+				m1.updatemovie(DBConnection.getConnection());
+				// Löscht alle Einträge aus HasGenre mit der Movie id von moviedto
+				// Wenn ein Object gelöscht wird welches nicht existiert in der Datenbank ist das fine.
+				for (Genre genre : GenreFactory.findByGenre("")) {
+					HasGenre hasGenre = new HasGenre(genre.getGenreid(), m1.getMovieid());
+					hasGenre.deleteHasGenre(DBConnection.getConnection());
+				}
+				insertHasGenre(movieDTO, m1);
 
-			insertMovieCharcter(movieDTO, m1);
-
-
-		} else {
-			m1.updatemovie(DBConnection.getConnection());
-			/*
-			Löscht alle Einträge aus HasGenre mit der Movie id von moviedto
-			*/
-			for (Genre genre : GenreFactory.findByGenre("")) {
-				HasGenre hasGenre = new HasGenre(genre.getGenreid() , m1.getMovieid());
-				hasGenre.deleteHasGenre(DBConnection.getConnection());
+				for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(m1.getMovieid())) {
+					MovieCharacter movieCharacter1 = new MovieCharacter(
+							movieCharacter.getMovCharID(),
+							movieCharacter.getCharacter(),
+							movieCharacter.getAlias(),
+							movieCharacter.getPosition(),
+							movieCharacter.getMovieID(),
+							movieCharacter.getPersonID()
+					);
+					movieCharacter1.deleteMovieCharacter(DBConnection.getConnection());
+				}
+				insertMovieCharcter(movieDTO, m1);
 			}
-			insertHasGenre(movieDTO, m1);
-
-			for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(m1.getMovieid())) {
-				MovieCharacter movieCharacter1 = new MovieCharacter(
-						movieCharacter.getMovCharID(),
-						movieCharacter.getCharacter(),
-						movieCharacter.getAlias(),
-						movieCharacter.getPosition(),
-						movieCharacter.getMovieID(),
-						movieCharacter.getPersonID()
-				);
-				movieCharacter1.deleteMovieCharacter(DBConnection.getConnection());
+			DBConnection.getConnection().commit();
+			ok = true;
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			if (!ok) {
+				DBConnection.getConnection().rollback();
 			}
-			insertMovieCharcter(movieDTO, m1);
-
 		}
-
 	}
 	/*
 	loop jeden Genre aus moviedto
@@ -116,8 +114,7 @@ public class MovieManager {
 	 */
 	public void deleteMovie(long movieId) throws Exception {
 		// TODO
-		Movie m1 = MovieFactory.findById(movieId);
-		m1.deletemovie(DBConnection.getConnection());
+
 	}
 
 	/**
@@ -137,7 +134,7 @@ public class MovieManager {
 		md.setType(m1.getType());
 
 
-		for (Long id : HasGenreFactory.findById(movieId)) {
+		for (Long id : HasGenreFactory.findByMovieId(movieId)) {
 			Genre genre = GenreFactory.findbyid(id);
 			md.addGenre(genre.getGenre());
 		}

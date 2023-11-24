@@ -29,8 +29,10 @@ public class Person {
             statement.setString(1, name);
             statement.setString(2, sex);
             int cnt = statement.executeUpdate();
-
             setPersonID(conn);
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -48,6 +50,9 @@ public class Person {
             statement.setLong(3, personID);
 
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -62,6 +67,9 @@ public class Person {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, personID);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 

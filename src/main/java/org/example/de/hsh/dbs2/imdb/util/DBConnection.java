@@ -13,7 +13,7 @@ public class DBConnection {
 			// TODO: Connection to SQLite-DB
 			conn = DriverManager.getConnection(
 					"jdbc:sqlite:sqlite-test.db");
-//			conn.setAutoCommit(false);
+			conn.setAutoCommit(false);
 			System.out.println("Connect durchgefuehrt ....");
 		} catch (Exception e) {
 			System.err.println("Error while connecting to database");

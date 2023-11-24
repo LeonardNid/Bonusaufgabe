@@ -28,14 +28,18 @@ public class App {
 
 
 
-        try {
-//            testMovie();
-            testGenre();
-            testPerson();
-//            testMovieCharacter();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+////            testMovie();
+//            testGenre();
+//            testPerson();
+////            testMovieCharacter();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+
+
+
+
 //        testHasGenre();
 
 
@@ -126,9 +130,9 @@ public class App {
         m1.insertIntoGenre(conn);
 //        m1.insertIntoGenre(conn); // exception
 
-        Genre m2 = new Genre("Action"); // testet update
+        Genre m2 = new Genre("AKTION"); // testet update
         m2.insertIntoGenre(conn);
-        m2.setGenre("AKTION");
+        m2.setGenre("Action");
         m2.updateGenre(conn);
 
         Genre m3 = new Genre("Drama"); // testet delete
@@ -211,6 +215,9 @@ public class App {
         String sql = "DROP TABLE " + table + " ;";
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -219,26 +226,30 @@ public class App {
     public static void createTables() {
         createTable("create table genre (" +
                 "genreid integer primary key," +
-                " genre varchar(100))");
+                " genre varchar(100) CHECK (length(genre) <= 100));");
 
-        createTable("create table movie ( movieid integer primary key," +
-                " title varchar(100)," +
+        createTable("create table movie ( " +
+                "movieid integer primary key," +
+                " title varchar(100) CHECK (length(title) <= 100)," +
                 " year integer," +
-                " type varchar(1));");
+                " type VARCHAR(1) CHECK (length(type) = 1));");
 
-        createTable( "create table hasgenre ( genreid integer," +
-                " movieid integer," +
-                " primary key(genreid, movieid), " +
+        createTable( "create table hasgenre ( " +
+                "genreid integer," +
+                "movieid integer," +
+                "primary key(genreid, movieid), " +
                 "foreign key (genreid) references genre(genreid), " +
                 "foreign key (movieid) references movie(movieid));");
 
-        createTable(   "create table person ( personid integer primary key, " +
-                "name varchar(100), " +
-                "sex varchar(1));");
+        createTable("create table person ( " +
+                "personid integer primary key, " +
+                "name varchar(100) UNIQUE CHECK (length(name) <= 100), " +
+                "sex varchar(1) CHECK (length(sex) = 1));");
 
-        createTable( "create table moviecharacter (movcharid integer primary key, " +
-                "character varchar(100), " +
-                "alias varchar(100), " +
+        createTable( "create table moviecharacter (" +
+                "movcharid integer primary key, " +
+                "character varchar(100) CHECK (length(character) <= 100), " +
+                "alias varchar(100) CHECK (length(alias) <= 100), " +
                 "position integer, " +
                 "movieid integer, " +
                 "personid integer, " +
@@ -248,6 +259,9 @@ public class App {
     public static void createTable(String sql) {
         try(PreparedStatement statement = conn.prepareStatement(sql)) {
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

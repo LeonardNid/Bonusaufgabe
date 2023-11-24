@@ -35,18 +35,13 @@ public class PersonFactory {
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1,search);
 
-            Person person = null;
-
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    long id = rs.getLong("personid");
-                    String name = rs.getString("name");
-                    String sex = rs.getString("sex");
+                long id = rs.getLong("personid");
+                String name = rs.getString("name");
+                String sex = rs.getString("sex");
 
-                    person = new Person(id, name, sex);
-                }
+                return new Person(id, name, sex);
             }
-            return person;
         }
     }
 

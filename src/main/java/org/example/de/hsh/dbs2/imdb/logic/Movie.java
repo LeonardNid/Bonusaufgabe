@@ -36,9 +36,10 @@ public class Movie {
             statement.setInt(2, year);
             statement.setString(3, type);
             int cnt = statement.executeUpdate();
-
-
             setMovieid(conn);
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -57,6 +58,9 @@ public class Movie {
             statement.setLong(4, movieid);
 
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -71,6 +75,9 @@ public class Movie {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, movieid);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 

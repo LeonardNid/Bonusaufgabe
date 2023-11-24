@@ -10,10 +10,12 @@ import java.util.ArrayList;
 public class GenreFactory {
     public static ArrayList<Genre> findByGenre(String search) throws SQLException {
         String sql = "SELECT * FROM genre " +
-                "WHERE genre like ? ;";
-        ArrayList<Genre> list = new ArrayList<>();
+                "WHERE genre like ? " +
+                "ORDER BY genre;";
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1, "%" + search + "%");
+
+            ArrayList<Genre> list = new ArrayList<>();
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -23,7 +25,6 @@ public class GenreFactory {
                     list.add(new Genre(id, genre));
                 }
             }
-
             return list;
         }
     }
@@ -31,18 +32,14 @@ public class GenreFactory {
     public static Genre findOneGenre(String search) throws SQLException {
         String sql = "SELECT * FROM genre " +
                 "WHERE genre = ? ;";
-        Genre genre = null;
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setString(1, search);
 
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    Long id = rs.getLong("genreid");
-                    String genreString = rs.getString("genre");
+                Long id = rs.getLong("genreid");
+                String genreString = rs.getString("genre");
 
-                    genre = new Genre(id, genreString);
-                }
-                return genre;
+                return new Genre(id, genreString);
             }
         }
     }

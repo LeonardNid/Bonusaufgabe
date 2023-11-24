@@ -25,8 +25,10 @@ public class Genre {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, genre);
             int cnt = statement.executeUpdate();
-
             setGenreid(conn);
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -43,6 +45,9 @@ public class Genre {
             statement.setLong(2, genreid);
 
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -57,6 +62,9 @@ public class Genre {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, genreid);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 

@@ -63,7 +63,9 @@ public class MovieCharacter {
             statement.setLong(4, movieID);
             statement.setLong(5, personID);
             int cnt = statement.executeUpdate();
-
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
             setMovCharID(conn);
         }
     }
@@ -85,6 +87,9 @@ public class MovieCharacter {
             statement.setLong(6, movCharID);
 
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -99,6 +104,9 @@ public class MovieCharacter {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setLong(1, movCharID);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 

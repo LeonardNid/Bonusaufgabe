@@ -13,9 +13,10 @@ public class MovieCharacterFactory {
     public static ArrayList<MovieCharacter> findByMovieId(Long movieid) throws SQLException {
         String sql = "SELECT * FROM movieCharacter " +
                 "WHERE movieid = ? ;";
-        ArrayList<MovieCharacter> list = new ArrayList<>();
         try (PreparedStatement statement = DBConnection.getConnection().prepareStatement(sql)) {
             statement.setLong(1, movieid);
+
+            ArrayList<MovieCharacter> list = new ArrayList<>();
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -26,7 +27,7 @@ public class MovieCharacterFactory {
                     Long movieid2 = rs.getLong("movieid");
                     Long personid = rs.getLong("personid");
 
-                    list.add(new MovieCharacter(id,character,alias,position,movieid,personid));
+                    list.add(new MovieCharacter(id,character,alias,position,movieid2,personid));
                 }
             }
             return list;

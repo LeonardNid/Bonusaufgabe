@@ -24,6 +24,9 @@ public class HasGenre {
             statement.setLong(1, genreid);
             statement.setLong(2, movieid);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
@@ -39,6 +42,9 @@ public class HasGenre {
             statement.setLong(1, genreid);
             statement.setLong(2, movieid);
             int cnt = statement.executeUpdate();
+            if (cnt == 0) {
+                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
+            }
         }
     }
 
