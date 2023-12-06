@@ -4,8 +4,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
 import org.example.de.hsh.dbs2.imdb.logic.dto.*;
-import org.example.de.hsh.dbs2.imdb.util.DBConnection;
+import org.example.de.hsh.dbs2.imdb.util.EntityFactory;
 
 public class MovieManager {
 
@@ -20,10 +21,17 @@ public class MovieManager {
 	public List<MovieDTO> getMovieList(String search) throws Exception {
 		// TODO
 		List<MovieDTO> list = new ArrayList<>();
-		ArrayList<Movie> movies = MovieFactory.findBytitle(search);
+		EntityManager em = EntityFactory.getEMF().createEntityManager();
+		em.getTransaction().begin();
+		List<Movie> movies = em.createQuery("SELECT m FROM Movie m WHERE m.title LIKE :title", Movie.class)
+				.setParameter("title", "%" + search + "%")
+				.getResultList();
 		for (Movie movie : movies) {
-			list.add(getMovie(movie.getMovieid()));
+			list.add(getMovie(movie.getId()));
 		}
+		em.getTransaction().commit();
+		em.close();
+
 		return list;
 	}
 
@@ -33,83 +41,50 @@ public class MovieManager {
 	 * Dazu werden die Daten des Films selbst (Titel, Jahr, Typ) beruecksichtigt,
 	 * aber auch alle Genres, die dem Film zugeordnet sind und die Liste der Charaktere
 	 * auf den neuen Stand gebracht.
-	 * @param movie Film-Objekt mit Genres und Charakteren.
+	 * @param movieDTO Film-Objekt mit Genres und Charakteren.
 	 * @throws Exception
 	 */
 	public void insertUpdateMovie(MovieDTO movieDTO) throws Exception {
 		// TODO
-		boolean ok = false;
-		Movie m1 = new Movie(movieDTO.getId(), movieDTO.getTitle(), movieDTO.getYear(), movieDTO.getType());
-		try {
-			if (m1.getMovieid() == null) {
-				m1.insertIntomovie(DBConnection.getConnection());
-				movieDTO.setId(m1.getMovieid());
+		EntityManager em = EntityFactory.getEMF().createEntityManager();
+		em.getTransaction().begin();
+		Movie m1 = null;
 
-				insertHasGenre(movieDTO, m1);
-				insertMovieCharcter(movieDTO, m1);
+		if (movieDTO.getId() == null) {
+			System.out.println("movieDTO id = null");
+			m1 = new Movie(movieDTO.getTitle(), movieDTO.getType(), movieDTO.getYear());
 
-			} else {
-				m1.updatemovie(DBConnection.getConnection());
-				// Löscht alle Einträge aus HasGenre mit der Movie id von moviedto
-				// Wenn ein Object gelöscht wird welches nicht existiert in der Datenbank ist das fine.
-				for (Genre genre : GenreFactory.findByGenre("")) {
-					HasGenre hasGenre = new HasGenre(genre.getGenreid(), m1.getMovieid());
-					hasGenre.deleteHasGenre(DBConnection.getConnection());
-				}
-				insertHasGenre(movieDTO, m1);
 
-				for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(m1.getMovieid())) {
-					MovieCharacter movieCharacter1 = new MovieCharacter(
-							movieCharacter.getMovCharID(),
-							movieCharacter.getCharacter(),
-							movieCharacter.getAlias(),
-							movieCharacter.getPosition(),
-							movieCharacter.getMovieID(),
-							movieCharacter.getPersonID()
-					);
-					movieCharacter1.deleteMovieCharacter(DBConnection.getConnection());
-				}
-				insertMovieCharcter(movieDTO, m1);
+			System.out.println("1 : " + m1.getId());
+
+
+			for (String genre : movieDTO.getGenres()) {
+				m1.addGenre(genre, em);
 			}
-			DBConnection.getConnection().commit();
-			ok = true;
-		} catch (Exception e) {
-			throw new Exception(e);
-		} finally {
-			if (!ok) {
-				DBConnection.getConnection().rollback();
+			for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
+				MovieCharacter movieCharacter = new MovieCharacter(
+						characterDTO.getCharacter(),
+						characterDTO.getAlias()
+				);
+//				movieCharacter.addMovie(m1.getId(), em);
+				movieCharacter.setMovie(m1);
+				movieCharacter.addPerson(characterDTO.getPlayer(), em);
+				em.persist(movieCharacter);
+				m1.addMovieCharacter(movieCharacter.getId(), em);
 			}
 		}
-	}
-	/*
-	loop jeden Genre aus moviedto
-	Genre wird mit findOneGenre gefunden um auf die id zugreifen zu können
-	Hasgenre wird erstellt und insertet
-	 */
-	private void insertHasGenre(MovieDTO movieDTO, Movie m1) throws Exception {
-		for (String genre : movieDTO.getGenres()) {
-			Genre genre1 = GenreFactory.findOneGenre(genre);
-			HasGenre hasGenre = new HasGenre(genre1.getGenreid() , m1.getMovieid());
-			hasGenre.insertIntoHasGenre(DBConnection.getConnection());
-		}
-	}
 
-	private void insertMovieCharcter(MovieDTO movieDTO, Movie m1) throws SQLException {
-		for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
-			MovieCharacter movieCharacter = new MovieCharacter(
-					characterDTO.getCharacter(),
-					characterDTO.getAlias(),
-					m1.getMovieid(),
-					PersonFactory.findOnename(characterDTO.getPlayer()).getPersonID()
-			);
-			movieCharacter.insertIntoMovieCharacter(DBConnection.getConnection());
-		}
+		System.out.println(m1.getMovieCharacters());
+
+		em.persist(m1);
+		em.getTransaction().commit();
+		em.close();
 	}
 
 	/**
 	 * Loescht einen Film aus der Datenbank. Es werden auch alle abhaengigen Objekte geloescht,
 	 * d.h. alle Charaktere und alle Genre-Zuordnungen.
-	 * @param movie
+	 * @param movieId
 	 * @throws Exception
 	 */
 	public void deleteMovie(long movieId) throws Exception {
@@ -125,30 +100,29 @@ public class MovieManager {
 	 */
 
 	public MovieDTO getMovie(long movieId) throws Exception {
-		// TODO
+		EntityManager em = EntityFactory.getEMF().createEntityManager();
+		em.getTransaction().begin();
 		MovieDTO md = new MovieDTO();
-		Movie m1 = MovieFactory.findById(movieId);
-		md.setId(m1.getMovieid());
+		Movie m1 = em.find(Movie.class, movieId);
+		md.setId(m1.getId());
 		md.setTitle(m1.getTitle());
 		md.setYear(m1.getYear());
 		md.setType(m1.getType());
 
-
-		for (Long id : HasGenreFactory.findByMovieId(movieId)) {
-			Genre genre = GenreFactory.findbyid(id);
+		for (Genre genre : m1.getGenres()) {
 			md.addGenre(genre.getGenre());
 		}
 
-		for (MovieCharacter movieCharacter : MovieCharacterFactory.findByMovieId(movieId)) {
+		for (MovieCharacter movieCharacter : m1.getMovieCharacters()) {
 			CharacterDTO characterDTO = new CharacterDTO();
 			characterDTO.setAlias(movieCharacter.getAlias());
 			characterDTO.setCharacter(movieCharacter.getCharacter());
-			characterDTO.setPlayer(PersonFactory.findbyid(movieCharacter.getPersonID()).getName());
+			characterDTO.setPlayer(movieCharacter.getPerson().getName());
 			md.addCharacter(characterDTO);
 		}
 
-
-
+		em.getTransaction().commit();
+		em.close();
 		return md;
 	}
 

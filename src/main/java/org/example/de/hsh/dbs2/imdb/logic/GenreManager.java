@@ -1,11 +1,9 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import org.example.de.hsh.dbs2.imdb.util.DBConnection;
+import jakarta.persistence.EntityManager;
+import org.example.de.hsh.dbs2.imdb.util.EntityFactory;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GenreManager {
@@ -18,13 +16,17 @@ public class GenreManager {
 	 */
 	public List<String> getGenres() throws Exception {
 		// TODO
-		List<String> list = new ArrayList<>();
-
-		for (Genre genre : GenreFactory.findByGenre("")) {
-			list.add(genre.getGenre());
+		// TODO Darf man JPA stuff auch in den Managern benutzen. Man durfte nämlich kein JDBC hier benutzen.
+		List<String> genres = new ArrayList<>();
+		EntityManager em = EntityFactory.getEMF().createEntityManager();
+		em.getTransaction().begin();
+		List<Genre> results = em.createQuery("SELECT g FROM Genre g", Genre.class).getResultList();
+		for (Genre genre : results) {
+			genres.add(genre.getGenre());
 		}
-
-		return list;
+		em.getTransaction().commit();
+		em.close();
+		return genres;
 	}
 
 }

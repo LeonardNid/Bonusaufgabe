@@ -1,92 +1,38 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity()
+@Table(name = "UE08_GENRE")
 public class Genre {
-    private Long genreid = null;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
     private String genre;
+    @ManyToMany(mappedBy = "genres")
+    private Set<Movie> movies = new HashSet<>();
+
     public Genre(String genre) {
         this.genre = genre;
     }
     public Genre(Long genreid, String genre) {
-        this.genreid = genreid;
+        this.id = genreid;
         this.genre = genre;
     }
 
-    public void insertIntoGenre(Connection conn) throws SQLException {
-        if (genreid != null) {
-            throw new RuntimeException();
-        }
+    public Genre() {
 
-        String sql = "INSERT INTO genre (genre) VALUES (?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, genre);
-            int cnt = statement.executeUpdate();
-            setGenreid(conn);
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
     }
 
-    public void updateGenre(Connection conn) throws SQLException {
-        if (genreid == null) {
-            throw new RuntimeException();
-        }
-
-        String sql = "UPDATE genre "+
-                " SET genre = ?"+
-                " WHERE genreid = ?;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, genre);
-            statement.setLong(2, genreid);
-
-            int cnt = statement.executeUpdate();
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
-    }
-
-    public void deleteGenre(Connection conn) throws SQLException {
-        if (genreid == null) {
-            throw new RuntimeException();
-        }
-
-
-        String sql = "DELETE FROM genre "+
-                " WHERE genreid = ?;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, genreid);
-            int cnt = statement.executeUpdate();
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
-    }
-
-    private void setGenreid(Connection conn) throws SQLException {
-        String sql = "SELECT last_insert_rowid() AS id;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            try (ResultSet rs = statement.executeQuery()) {
-                this.genreid = rs.getLong(1);
-            }
-        }
-    }
-
-    public long getGenreid() {
-        return genreid;
+    public Long getId() {
+        return id;
     }
 
     public String getGenre() {
         return genre;
     }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
 }

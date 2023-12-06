@@ -1,120 +1,82 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import org.example.de.hsh.dbs2.imdb.util.DBConnection;
+import jakarta.persistence.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+@Entity()
+@Table(name = "UE08_MOVIE")
 public class Movie {
-    private Long movieid = null;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String title;
-    private Integer year;
+    private int year;
     private String type;
-    public Movie(String title, Integer year, String type) {
-        this.title = title;
-        this.year = year;
-        this.type =type;
-    }
+    @ManyToMany
+    @JoinTable(name = "UE08_HASGENRE")
+    private Set<Genre> genres = new HashSet<>();
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    private List<MovieCharacter> movieCharacters = new ArrayList<>();
+    @Transient
+    private int positionCount = 0;
+
     public Movie(Long movieid, String title, Integer year, String type) {
-        this.movieid = movieid;
+        this.id = movieid;
         this.title = title;
         this.year = year;
         this.type =type;
     }
 
-    public void insertIntomovie(Connection conn) throws Exception {
-        if (movieid != null) {
-            throw new RuntimeException();
-        }
-
-        String sql = "INSERT INTO movie (title, year, type) VALUES (?, ?, ?);";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, title);
-            statement.setInt(2, year);
-            statement.setString(3, type);
-            int cnt = statement.executeUpdate();
-            setMovieid(conn);
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
+    public Movie(String title, String type, int year) {
+        this.title = title;
+        this.type = type;
+        this.year = year;
     }
 
-    public void updatemovie(Connection conn) throws SQLException {
-        if (movieid == null) {
-            throw new RuntimeException();
-        }
+    public Movie() {
 
-        String sql = "UPDATE movie "+
-                " SET title = ?, year = ?, type = ? "+
-                " WHERE movieid = ?;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, title);
-            statement.setInt(2, year);
-            statement.setString(3, type);
-            statement.setLong(4, movieid);
-
-            int cnt = statement.executeUpdate();
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
     }
 
-    public void deletemovie(Connection conn) throws Exception {
-        if (movieid == null) {
-            throw new RuntimeException();
-        }
-
-
-        String sql = "DELETE FROM movie "+
-                " WHERE movieid = ?;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setLong(1, movieid);
-            int cnt = statement.executeUpdate();
-            if (cnt == 0) {
-                throw new SQLException("ExecuteUpdate: Kein Datensatz wurde aktualisiert");
-            }
-        }
+    public void addGenre(Long genreId, EntityManager em) {
+        genres.add(em.find(Genre.class, genreId));
+    }
+    public void addGenre(String genre, EntityManager em) {
+        genres.add(em.createQuery("SELECT g FROM Genre g WHERE g.genre = :genre", Genre.class)
+                .setParameter("genre", genre)
+                .getSingleResult()
+        );
     }
 
-    private void setMovieid(Connection conn) throws SQLException {
-        String sql = "SELECT last_insert_rowid() AS id;";
-        try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            try (ResultSet rs = statement.executeQuery()) {
-                this.movieid = rs.getLong(1);
-            }
-        }
+    public void addMovieCharacter(Long movCharId, EntityManager em) {
+        MovieCharacter movieCharacter = em.find(MovieCharacter.class, movCharId);
+        movieCharacter.setPosition(positionCount++);
+        movieCharacters.add(movieCharacter);
     }
 
-    public Long getMovieid() {
-        return movieid;
+    public Long getId() {
+        return id;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public int getYear() {
+        return year;
+    }
+
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public List<MovieCharacter> getMovieCharacters() {
+        return movieCharacters;
     }
 }
