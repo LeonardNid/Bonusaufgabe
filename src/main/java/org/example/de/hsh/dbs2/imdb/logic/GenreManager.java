@@ -17,15 +17,23 @@ public class GenreManager {
 	public List<String> getGenres() throws Exception {
 		// TODO
 		List<String> genres = new ArrayList<>();
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
-		List<Genre> results = em.createQuery("SELECT g FROM Genre g", Genre.class).getResultList();
-		for (Genre genre : results) {
-			genres.add(genre.getGenre());
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+
+			em.getTransaction().begin();
+			List<Genre> results = em.createQuery("SELECT g FROM Genre g", Genre.class).getResultList();
+			for (Genre genre : results) {
+				genres.add(genre.getGenre());
+			}
+			em.getTransaction().commit();
+			return genres;
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
 		}
-		em.getTransaction().commit();
-		em.close();
-		return genres;
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
 import jakarta.persistence.*;
+import org.example.de.hsh.dbs2.imdb.util.EntityFactory;
 
 import java.util.*;
 
@@ -44,15 +45,20 @@ public class Movie {
         );
     }
 
+    public void clearGenres() {
+        genres.clear();
+    }
+
     public void addMovieCharacter(MovieCharacter movieCharacter) {
         movieCharacter.setPosition(positionCount++);
         movieCharacters.add(movieCharacter);
     }
 
-    public void clearMoviecharacters(EntityManager em) {
+    public void clearMoviecharacters(EntityManager em, Movie movie) {
         for (MovieCharacter movieCharacter : movieCharacters) {
             em.remove(movieCharacter);
         }
+
         movieCharacters.clear();
         positionCount = 0;
     }

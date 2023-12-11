@@ -20,18 +20,24 @@ public class MovieManager {
 	public List<MovieDTO> getMovieList(String search) throws Exception {
 		// TODO
 		List<MovieDTO> list = new ArrayList<>();
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
-		List<Movie> movies = em.createQuery("SELECT m FROM Movie m WHERE m.title LIKE :title", Movie.class)
-				.setParameter("title", "%" + search + "%")
-				.getResultList();
-		for (Movie movie : movies) {
-			list.add(getMovie(movie.getId()));
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+			em.getTransaction().begin();
+			List<Movie> movies = em.createQuery("SELECT m FROM Movie m WHERE m.title LIKE :title", Movie.class)
+					.setParameter("title", "%" + search + "%")
+					.getResultList();
+			for (Movie movie : movies) {
+				list.add(getMovie(movie.getId()));
+			}
+			em.getTransaction().commit();
+			return list;
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
 		}
-		em.getTransaction().commit();
-		em.close();
-
-		return list;
 	}
 
 	/**
@@ -45,32 +51,58 @@ public class MovieManager {
 	 */
 	public void insertUpdateMovie(MovieDTO movieDTO) throws Exception {
 		// TODO
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+			em.getTransaction().begin();
+			Movie m1;
 
-		if (movieDTO.getId() != null) {
-			deleteMovie(movieDTO.getId());
+			if (movieDTO.getId() != null) {
+				m1 = em.find(Movie.class, movieDTO.getId());
+
+				m1.clearGenres();
+
+				for (String genre : movieDTO.getGenres()) {
+					m1.addGenre(genre, em);
+				}
+
+				m1.clearMoviecharacters(em, m1);
+
+				for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
+					MovieCharacter movieCharacter = new MovieCharacter(
+							characterDTO.getCharacter(),
+							characterDTO.getAlias()
+					);
+					movieCharacter.setMovie(m1);
+					movieCharacter.setPerson(characterDTO.getPlayer(), em);
+					m1.addMovieCharacter(movieCharacter);
+				}
+
+			} else {
+				m1 = new Movie(movieDTO.getTitle(), movieDTO.getType(), movieDTO.getYear());
+
+				for (String genre : movieDTO.getGenres()) {
+					m1.addGenre(genre, em);
+				}
+
+				for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
+					MovieCharacter movieCharacter = new MovieCharacter(
+							characterDTO.getCharacter(),
+							characterDTO.getAlias()
+					);
+					movieCharacter.setMovie(m1);
+					movieCharacter.setPerson(characterDTO.getPlayer(), em);
+					m1.addMovieCharacter(movieCharacter);
+				}
+			}
+			em.persist(m1);
+			em.getTransaction().commit();
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
 		}
-
-		Movie m1 = new Movie(movieDTO.getTitle(), movieDTO.getType(), movieDTO.getYear());
-
-		for (String genre : movieDTO.getGenres()) {
-			m1.addGenre(genre, em);
-		}
-
-		for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
-			MovieCharacter movieCharacter = new MovieCharacter(
-					characterDTO.getCharacter(),
-					characterDTO.getAlias()
-			);
-			movieCharacter.setMovie(m1);
-			movieCharacter.setPerson(characterDTO.getPlayer(), em);
-			m1.addMovieCharacter(movieCharacter);
-		}
-		em.persist(m1);
-
-		em.getTransaction().commit();
-		em.close();
 	}
 
 	/**
@@ -80,16 +112,21 @@ public class MovieManager {
 	 * @throws Exception
 	 */
 	public void deleteMovie(long movieId) throws Exception {
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+			em.getTransaction().begin();
 
-		Movie removie = em.find(Movie.class, movieId);
-		removie.clearMoviecharacters(em);
+			Movie removie = em.find(Movie.class, movieId);
+			em.remove(removie);
 
-		em.remove(removie);
-
-		em.getTransaction().commit();
-		em.close();
+			em.getTransaction().commit();
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
+		}
 	}
 
 	/**
@@ -100,30 +137,36 @@ public class MovieManager {
 	 */
 
 	public MovieDTO getMovie(long movieId) throws Exception {
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
-		MovieDTO md = new MovieDTO();
-		Movie m1 = em.find(Movie.class, movieId);
-		md.setId(m1.getId());
-		md.setTitle(m1.getTitle());
-		md.setYear(m1.getYear());
-		md.setType(m1.getType());
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+			em.getTransaction().begin();
+			MovieDTO md = new MovieDTO();
+			Movie m1 = em.find(Movie.class, movieId);
+			md.setId(m1.getId());
+			md.setTitle(m1.getTitle());
+			md.setYear(m1.getYear());
+			md.setType(m1.getType());
 
-		for (Genre genre : m1.getGenres()) {
-			md.addGenre(genre.getGenre());
+			for (Genre genre : m1.getGenres()) {
+				md.addGenre(genre.getGenre());
+			}
+
+			for (MovieCharacter movieCharacter : m1.getSortedMovieCharacters()) {
+				CharacterDTO characterDTO = new CharacterDTO();
+				characterDTO.setAlias(movieCharacter.getAlias());
+				characterDTO.setCharacter(movieCharacter.getCharacter());
+				characterDTO.setPlayer(movieCharacter.getPerson().getName());
+				md.addCharacter(characterDTO);
+			}
+
+			em.getTransaction().commit();
+			return md;
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
 		}
-
-		for (MovieCharacter movieCharacter : m1.getSortedMovieCharacters()) {
-			CharacterDTO characterDTO = new CharacterDTO();
-			characterDTO.setAlias(movieCharacter.getAlias());
-			characterDTO.setCharacter(movieCharacter.getCharacter());
-			characterDTO.setPlayer(movieCharacter.getPerson().getName());
-			md.addCharacter(characterDTO);
-		}
-
-		em.getTransaction().commit();
-		em.close();
-		return md;
 	}
-
 }

@@ -17,17 +17,24 @@ public class PersonManager {
 	public List<String> getPersonList(String text) throws Exception {
 		// TODO
 		List<String> personen = new ArrayList<>();
-		EntityManager em = EntityFactory.getEMF().createEntityManager();
-		em.getTransaction().begin();
-		List<Person> results = em.createQuery("SELECT p FROM Person p WHERE p.name LIKE :name", Person.class)
-				.setParameter("name", "%" + text + "%")
-				.getResultList();
-		for (Person person : results) {
-			personen.add(person.getName());
+		EntityManager em = null;
+		try {
+			em = EntityFactory.getEMF().createEntityManager();
+			em.getTransaction().begin();
+			List<Person> results = em.createQuery("SELECT p FROM Person p WHERE p.name LIKE :name", Person.class)
+					.setParameter("name", "%" + text + "%")
+					.getResultList();
+			for (Person person : results) {
+				personen.add(person.getName());
+			}
+			em.getTransaction().commit();
+			return personen;
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			em.close();
 		}
-		em.getTransaction().commit();
-		em.close();
-		return personen;
 	}
 
 }
