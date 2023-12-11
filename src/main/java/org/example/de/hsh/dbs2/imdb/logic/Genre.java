@@ -16,9 +16,6 @@ public class Genre {
     @ManyToMany(mappedBy = "genres")
     private Set<Movie> movies = new HashSet<>();
 
-    public Genre(String genre) {
-        this.genre = genre;
-    }
     public Genre(Long genreid, String genre) {
         this.id = genreid;
         this.genre = genre;

@@ -24,10 +24,6 @@ public class Person {
         this.sex =sex;
     }
 
-    public Person(String name, String sex) {
-        this.name = name;
-        this.sex = sex;
-    }
 
     public Person() {
 

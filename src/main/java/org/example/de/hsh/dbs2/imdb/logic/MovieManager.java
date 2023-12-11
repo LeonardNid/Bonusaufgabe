@@ -1,6 +1,5 @@
 package org.example.de.hsh.dbs2.imdb.logic;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,35 +47,28 @@ public class MovieManager {
 		// TODO
 		EntityManager em = EntityFactory.getEMF().createEntityManager();
 		em.getTransaction().begin();
-		Movie m1 = null;
 
-		if (movieDTO.getId() == null) {
-			System.out.println("movieDTO id = null");
-			m1 = new Movie(movieDTO.getTitle(), movieDTO.getType(), movieDTO.getYear());
-
-
-			System.out.println("1 : " + m1.getId());
-
-
-			for (String genre : movieDTO.getGenres()) {
-				m1.addGenre(genre, em);
-			}
-			for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
-				MovieCharacter movieCharacter = new MovieCharacter(
-						characterDTO.getCharacter(),
-						characterDTO.getAlias()
-				);
-//				movieCharacter.addMovie(m1.getId(), em);
-				movieCharacter.setMovie(m1);
-				movieCharacter.addPerson(characterDTO.getPlayer(), em);
-				em.persist(movieCharacter);
-				m1.addMovieCharacter(movieCharacter.getId(), em);
-			}
+		if (movieDTO.getId() != null) {
+			deleteMovie(movieDTO.getId());
 		}
 
-		System.out.println(m1.getMovieCharacters());
+		Movie m1 = new Movie(movieDTO.getTitle(), movieDTO.getType(), movieDTO.getYear());
 
+		for (String genre : movieDTO.getGenres()) {
+			m1.addGenre(genre, em);
+		}
+
+		for (CharacterDTO characterDTO : movieDTO.getCharacters()) {
+			MovieCharacter movieCharacter = new MovieCharacter(
+					characterDTO.getCharacter(),
+					characterDTO.getAlias()
+			);
+			movieCharacter.setMovie(m1);
+			movieCharacter.setPerson(characterDTO.getPlayer(), em);
+			m1.addMovieCharacter(movieCharacter);
+		}
 		em.persist(m1);
+
 		em.getTransaction().commit();
 		em.close();
 	}
@@ -88,8 +80,16 @@ public class MovieManager {
 	 * @throws Exception
 	 */
 	public void deleteMovie(long movieId) throws Exception {
-		// TODO
+		EntityManager em = EntityFactory.getEMF().createEntityManager();
+		em.getTransaction().begin();
 
+		Movie removie = em.find(Movie.class, movieId);
+		removie.clearMoviecharacters(em);
+
+		em.remove(removie);
+
+		em.getTransaction().commit();
+		em.close();
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class MovieManager {
 			md.addGenre(genre.getGenre());
 		}
 
-		for (MovieCharacter movieCharacter : m1.getMovieCharacters()) {
+		for (MovieCharacter movieCharacter : m1.getSortedMovieCharacters()) {
 			CharacterDTO characterDTO = new CharacterDTO();
 			characterDTO.setAlias(movieCharacter.getAlias());
 			characterDTO.setCharacter(movieCharacter.getCharacter());

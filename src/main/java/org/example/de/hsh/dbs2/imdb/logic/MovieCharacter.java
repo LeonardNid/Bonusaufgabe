@@ -21,11 +21,6 @@ public class MovieCharacter {
     private Person person;
 
 
-    public MovieCharacter(Long movCharID, String character, String alias) {
-        this.id = movCharID;
-        this.character = character;
-        this.alias = alias;
-    }
     public MovieCharacter(String character, String alias) {
         this.character = character;
         this.alias = alias;
@@ -39,21 +34,10 @@ public class MovieCharacter {
         this.movie = movie;
     }
 
-    public void addMovie(Long movieId, EntityManager em) {
-        this.movie = em.find(Movie.class, movieId);
-    }
-
-    public void addPerson(Long personId, EntityManager em) {
-        this.person = em.find(Person.class, personId);
-    }
-    public void addPerson(String name, EntityManager em) {
+    public void setPerson(String name, EntityManager em) {
         this.person = em.createQuery("select p from Person p where p.name = :name", Person.class)
                 .setParameter("name", name)
                 .getSingleResult();
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getCharacter() {
@@ -75,4 +59,5 @@ public class MovieCharacter {
     public Person getPerson() {
         return person;
     }
+
 }

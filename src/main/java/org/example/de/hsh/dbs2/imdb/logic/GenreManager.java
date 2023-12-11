@@ -16,7 +16,6 @@ public class GenreManager {
 	 */
 	public List<String> getGenres() throws Exception {
 		// TODO
-		// TODO Darf man JPA stuff auch in den Managern benutzen. Man durfte nämlich kein JDBC hier benutzen.
 		List<String> genres = new ArrayList<>();
 		EntityManager em = EntityFactory.getEMF().createEntityManager();
 		em.getTransaction().begin();
